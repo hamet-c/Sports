@@ -1,6 +1,6 @@
 # NBA Player Props Prediction Engine
 
-Predicts NBA player stat lines (points, rebounds, assists, threes-made) and identifies edges against sportsbook prop markets. Personal learning project — not a betting tool.
+Predicts NBA player stat lines (points, rebounds, assists, threes-made) and surfaces +EV plays against sportsbook prop markets. Trained on four seasons of game logs plus advanced box scores; serves a daily slate through a FastAPI + React dashboard.
 
 ## Stack
 
