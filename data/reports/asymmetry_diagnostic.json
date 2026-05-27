@@ -1,0 +1,490 @@
+{
+  "points": {
+    "n": 7426,
+    "h1_pred_bias": {
+      "mean_pred_minus_actual": 1.7723393005532393,
+      "median_pred_minus_actual": 2.3417091369628906,
+      "frac_pred_gt_actual": 0.6540533261513601
+    },
+    "h2_line_bias": {
+      "mean_line_minus_actual": -0.2721518987341772,
+      "frac_actual_over_line": 0.490304336116348,
+      "frac_actual_under_line": 0.5096956638836521,
+      "mean_baseline_minus_actual": -0.5242645958643805
+    },
+    "h3_calibration": {
+      "calibration": {
+        "00-10": {
+          "n": 4,
+          "hit_rate": 0.5
+        },
+        "10-20": {
+          "n": 13,
+          "hit_rate": 0.3076923076923077
+        },
+        "20-30": {
+          "n": 181,
+          "hit_rate": 0.2596685082872928
+        },
+        "30-40": {
+          "n": 727,
+          "hit_rate": 0.35488308115543327
+        },
+        "40-50": {
+          "n": 1995,
+          "hit_rate": 0.41353383458646614
+        },
+        "50-60": {
+          "n": 2480,
+          "hit_rate": 0.494758064516129
+        },
+        "60-70": {
+          "n": 1392,
+          "hit_rate": 0.5912356321839081
+        },
+        "70-80": {
+          "n": 474,
+          "hit_rate": 0.679324894514768
+        },
+        "80-90": {
+          "n": 123,
+          "hit_rate": 0.8292682926829268
+        },
+        "90-100": {
+          "n": 37,
+          "hit_rate": 0.8378378378378378
+        }
+      },
+      "low_p_over_n": 925,
+      "low_p_over_mean_pred_prob": 0.33765424178340175,
+      "low_p_over_actual_hit_rate": 0.3362162162162162,
+      "high_p_over_n": 2026,
+      "high_p_over_mean_pred_prob": 0.6816471687119067,
+      "high_p_over_actual_hit_rate": 0.6307996051332675
+    },
+    "h4_rec_geometry": {
+      "over_rec_n": 3176,
+      "over_rec_mean_p_over": 0.6427041286593936,
+      "over_rec_mean_std_line_pos": -0.29717003786559254,
+      "over_rec_mean_actual_minus_line": 1.7865239294710327,
+      "under_rec_n": 1783,
+      "under_rec_mean_p_over": 0.3805026857144057,
+      "under_rec_mean_std_line_pos": 0.23168329772029062,
+      "under_rec_mean_actual_minus_line": -1.8780145821648906
+    },
+    "h5_threshold_sweep": {
+      "by_ev_threshold": {
+        "0.000": {
+          "over_n": 3865,
+          "over_win_rate": 0.5689521345407503,
+          "under_n": 2374,
+          "under_win_rate": 0.6238416175231677
+        },
+        "0.025": {
+          "over_n": 3517,
+          "over_win_rate": 0.5789024736991755,
+          "under_n": 2059,
+          "under_win_rate": 0.6289460903351142
+        },
+        "0.050": {
+          "over_n": 3176,
+          "over_win_rate": 0.5900503778337531,
+          "under_n": 1783,
+          "under_win_rate": 0.64385866517106
+        },
+        "0.075": {
+          "over_n": 2832,
+          "over_win_rate": 0.5978107344632768,
+          "under_n": 1514,
+          "under_win_rate": 0.6453104359313078
+        },
+        "0.100": {
+          "over_n": 2546,
+          "over_win_rate": 0.6068342498036136,
+          "under_n": 1286,
+          "under_win_rate": 0.6531881804043546
+        },
+        "0.150": {
+          "over_n": 1974,
+          "over_win_rate": 0.6312056737588653,
+          "under_n": 901,
+          "under_win_rate": 0.6648168701442841
+        },
+        "0.200": {
+          "over_n": 1501,
+          "over_win_rate": 0.6475682878081279,
+          "under_n": 595,
+          "under_win_rate": 0.692436974789916
+        }
+      }
+    },
+    "h6_by_context": {
+      "rs": {
+        "n": 7426,
+        "mean_pred_minus_actual": 1.7723393005532393,
+        "mean_line_minus_actual": -0.2721518987341772,
+        "frac_actual_over_line": 0.490304336116348
+      }
+    }
+  },
+  "rebounds": {
+    "n": 7426,
+    "h1_pred_bias": {
+      "mean_pred_minus_actual": 1.2236234318237242,
+      "median_pred_minus_actual": 1.6022799015045166,
+      "frac_pred_gt_actual": 0.728386749259359
+    },
+    "h2_line_bias": {
+      "mean_line_minus_actual": 0.06746566119041207,
+      "frac_actual_over_line": 0.44505790465930517,
+      "frac_actual_under_line": 0.5549420953406948,
+      "mean_baseline_minus_actual": -0.17963616679277875
+    },
+    "h3_calibration": {
+      "calibration": {
+        "10-20": {
+          "n": 1,
+          "hit_rate": 0.0
+        },
+        "20-30": {
+          "n": 90,
+          "hit_rate": 0.23333333333333334
+        },
+        "30-40": {
+          "n": 533,
+          "hit_rate": 0.3339587242026266
+        },
+        "40-50": {
+          "n": 1754,
+          "hit_rate": 0.3728620296465222
+        },
+        "50-60": {
+          "n": 2442,
+          "hit_rate": 0.4221949221949222
+        },
+        "60-70": {
+          "n": 1558,
+          "hit_rate": 0.506418485237484
+        },
+        "70-80": {
+          "n": 913,
+          "hit_rate": 0.5783132530120482
+        },
+        "80-90": {
+          "n": 36,
+          "hit_rate": 0.6388888888888888
+        },
+        "90-100": {
+          "n": 99,
+          "hit_rate": 0.8181818181818182
+        }
+      },
+      "low_p_over_n": 624,
+      "low_p_over_mean_pred_prob": 0.3499718597767726,
+      "low_p_over_actual_hit_rate": 0.3189102564102564,
+      "high_p_over_n": 2606,
+      "high_p_over_mean_pred_prob": 0.688696856569432,
+      "high_p_over_actual_hit_rate": 0.5452801227935533
+    },
+    "h4_rec_geometry": {
+      "over_rec_n": 3804,
+      "over_rec_mean_p_over": 0.6526807104424556,
+      "over_rec_mean_std_line_pos": -0.27451168055355524,
+      "over_rec_mean_actual_minus_line": 0.38932702418506837,
+      "under_rec_n": 1302,
+      "under_rec_mean_p_over": 0.38999620679172803,
+      "under_rec_mean_std_line_pos": 0.23881801724122054,
+      "under_rec_mean_actual_minus_line": -0.9915514592933948
+    },
+    "h5_threshold_sweep": {
+      "by_ev_threshold": {
+        "0.000": {
+          "over_n": 4494,
+          "over_win_rate": 0.495549621717846,
+          "under_n": 1847,
+          "under_win_rate": 0.6513264753654575
+        },
+        "0.025": {
+          "over_n": 4154,
+          "over_win_rate": 0.5033702455464613,
+          "under_n": 1573,
+          "under_win_rate": 0.6617927527018436
+        },
+        "0.050": {
+          "over_n": 3804,
+          "over_win_rate": 0.5126182965299685,
+          "under_n": 1302,
+          "under_win_rate": 0.6774193548387096
+        },
+        "0.075": {
+          "over_n": 3473,
+          "over_win_rate": 0.5214511949323352,
+          "under_n": 1100,
+          "under_win_rate": 0.6772727272727272
+        },
+        "0.100": {
+          "over_n": 3153,
+          "over_win_rate": 0.5306057722803679,
+          "under_n": 900,
+          "under_win_rate": 0.6644444444444444
+        },
+        "0.150": {
+          "over_n": 2552,
+          "over_win_rate": 0.5466300940438872,
+          "under_n": 598,
+          "under_win_rate": 0.6839464882943144
+        },
+        "0.200": {
+          "over_n": 2000,
+          "over_win_rate": 0.571,
+          "under_n": 354,
+          "under_win_rate": 0.6892655367231638
+        }
+      }
+    },
+    "h6_by_context": {
+      "rs": {
+        "n": 7426,
+        "mean_pred_minus_actual": 1.2236234318237242,
+        "mean_line_minus_actual": 0.06746566119041207,
+        "frac_actual_over_line": 0.44505790465930517
+      }
+    }
+  },
+  "assists": {
+    "n": 7426,
+    "h1_pred_bias": {
+      "mean_pred_minus_actual": -0.08888489215835677,
+      "median_pred_minus_actual": 0.21829795837402344,
+      "frac_pred_gt_actual": 0.5575006733099919
+    },
+    "h2_line_bias": {
+      "mean_line_minus_actual": 0.13210342041475895,
+      "frac_actual_over_line": 0.4200107729598707,
+      "frac_actual_under_line": 0.5799892270401292,
+      "mean_baseline_minus_actual": -0.11913231716961854
+    },
+    "h3_calibration": {
+      "calibration": {
+        "00-10": {
+          "n": 1,
+          "hit_rate": 1.0
+        },
+        "10-20": {
+          "n": 55,
+          "hit_rate": 0.32727272727272727
+        },
+        "20-30": {
+          "n": 1075,
+          "hit_rate": 0.29209302325581393
+        },
+        "30-40": {
+          "n": 3080,
+          "hit_rate": 0.3691558441558442
+        },
+        "40-50": {
+          "n": 2167,
+          "hit_rate": 0.45408398707891096
+        },
+        "50-60": {
+          "n": 452,
+          "hit_rate": 0.6393805309734514
+        },
+        "60-70": {
+          "n": 589,
+          "hit_rate": 0.629881154499151
+        },
+        "70-80": {
+          "n": 7,
+          "hit_rate": 0.7142857142857143
+        }
+      },
+      "low_p_over_n": 4211,
+      "low_p_over_mean_pred_prob": 0.33098342303229106,
+      "low_p_over_actual_hit_rate": 0.34908572785561626,
+      "high_p_over_n": 596,
+      "high_p_over_mean_pred_prob": 0.6263107849420971,
+      "high_p_over_actual_hit_rate": 0.6308724832214765
+    },
+    "h4_rec_geometry": {
+      "over_rec_n": 812,
+      "over_rec_mean_p_over": 0.6134949784832936,
+      "over_rec_mean_std_line_pos": -0.23210997391504765,
+      "over_rec_mean_actual_minus_line": 0.6970443349753694,
+      "under_rec_n": 5719,
+      "under_rec_mean_p_over": 0.3548965744031919,
+      "under_rec_mean_std_line_pos": 0.3267602967347946,
+      "under_rec_mean_actual_minus_line": -0.32164714110858544
+    },
+    "h5_threshold_sweep": {
+      "by_ev_threshold": {
+        "0.000": {
+          "over_n": 927,
+          "over_win_rate": 0.6429341963322546,
+          "under_n": 6144,
+          "under_win_rate": 0.6204427083333334
+        },
+        "0.025": {
+          "over_n": 863,
+          "over_win_rate": 0.641946697566628,
+          "under_n": 5965,
+          "under_win_rate": 0.6233025984911986
+        },
+        "0.050": {
+          "over_n": 812,
+          "over_win_rate": 0.6416256157635468,
+          "under_n": 5719,
+          "under_win_rate": 0.6270326980241301
+        },
+        "0.075": {
+          "over_n": 765,
+          "over_win_rate": 0.6418300653594772,
+          "under_n": 5452,
+          "under_win_rate": 0.6296771826852531
+        },
+        "0.100": {
+          "over_n": 719,
+          "over_win_rate": 0.6397774687065368,
+          "under_n": 5073,
+          "under_win_rate": 0.6380839739798936
+        },
+        "0.150": {
+          "over_n": 580,
+          "over_win_rate": 0.6310344827586207,
+          "under_n": 4103,
+          "under_win_rate": 0.6519619790397271
+        },
+        "0.200": {
+          "over_n": 216,
+          "over_win_rate": 0.6620370370370371,
+          "under_n": 2994,
+          "under_win_rate": 0.667000668002672
+        }
+      }
+    },
+    "h6_by_context": {
+      "rs": {
+        "n": 7426,
+        "mean_pred_minus_actual": -0.08888489215835677,
+        "mean_line_minus_actual": 0.13210342041475895,
+        "frac_actual_over_line": 0.4200107729598707
+      }
+    }
+  },
+  "threes_made": {
+    "n": 7426,
+    "h1_pred_bias": {
+      "mean_pred_minus_actual": 0.221055403973836,
+      "median_pred_minus_actual": 0.4882557839155197,
+      "frac_pred_gt_actual": 0.6615943980608672
+    },
+    "h2_line_bias": {
+      "mean_line_minus_actual": 0.22111500134662,
+      "frac_actual_over_line": 0.34163748990035014,
+      "frac_actual_under_line": 0.6583625100996499,
+      "mean_baseline_minus_actual": -0.05652854193118131
+    },
+    "h3_calibration": {
+      "calibration": {
+        "00-10": {
+          "n": 172,
+          "hit_rate": 0.023255813953488372
+        },
+        "10-20": {
+          "n": 538,
+          "hit_rate": 0.05390334572490706
+        },
+        "20-30": {
+          "n": 974,
+          "hit_rate": 0.24229979466119098
+        },
+        "30-40": {
+          "n": 3823,
+          "hit_rate": 0.34946377190687944
+        },
+        "40-50": {
+          "n": 1072,
+          "hit_rate": 0.43283582089552236
+        },
+        "50-60": {
+          "n": 368,
+          "hit_rate": 0.5434782608695652
+        },
+        "60-70": {
+          "n": 479,
+          "hit_rate": 0.5594989561586639
+        }
+      },
+      "low_p_over_n": 5507,
+      "low_p_over_mean_pred_prob": 0.3176074967368236,
+      "low_p_over_actual_hit_rate": 0.2914472489558743,
+      "high_p_over_n": 479,
+      "high_p_over_mean_pred_prob": 0.6244758758018949,
+      "high_p_over_actual_hit_rate": 0.5594989561586639
+    },
+    "h4_rec_geometry": {
+      "over_rec_n": 658,
+      "over_rec_mean_p_over": 0.6099779175128829,
+      "over_rec_mean_std_line_pos": -0.27837784565778334,
+      "over_rec_mean_actual_minus_line": 0.49240121580547114,
+      "under_rec_n": 6362,
+      "under_rec_mean_p_over": 0.3310926760512357,
+      "under_rec_mean_std_line_pos": 0.5325585813804373,
+      "under_rec_mean_actual_minus_line": -0.33039924552027666
+    },
+    "h5_threshold_sweep": {
+      "by_ev_threshold": {
+        "0.000": {
+          "over_n": 775,
+          "over_win_rate": 0.5638709677419355,
+          "under_n": 6492,
+          "under_win_rate": 0.6880776340110906
+        },
+        "0.025": {
+          "over_n": 713,
+          "over_win_rate": 0.5596072931276297,
+          "under_n": 6424,
+          "under_win_rate": 0.6896014943960149
+        },
+        "0.050": {
+          "over_n": 658,
+          "over_win_rate": 0.5592705167173252,
+          "under_n": 6362,
+          "under_win_rate": 0.691763596353348
+        },
+        "0.075": {
+          "over_n": 602,
+          "over_win_rate": 0.5647840531561462,
+          "under_n": 6246,
+          "under_win_rate": 0.6942042907460775
+        },
+        "0.100": {
+          "over_n": 538,
+          "over_win_rate": 0.5669144981412639,
+          "under_n": 6102,
+          "under_win_rate": 0.6979678793838086
+        },
+        "0.150": {
+          "over_n": 470,
+          "over_win_rate": 0.5617021276595745,
+          "under_n": 5394,
+          "under_win_rate": 0.7119021134593994
+        },
+        "0.200": {
+          "over_n": 86,
+          "over_win_rate": 0.686046511627907,
+          "under_n": 3226,
+          "under_win_rate": 0.7696838189708618
+        }
+      }
+    },
+    "h6_by_context": {
+      "rs": {
+        "n": 7426,
+        "mean_pred_minus_actual": 0.221055403973836,
+        "mean_line_minus_actual": 0.22111500134662,
+        "frac_actual_over_line": 0.34163748990035014
+      }
+    }
+  }
+}
