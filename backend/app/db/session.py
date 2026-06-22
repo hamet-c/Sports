@@ -6,11 +6,22 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 from app.core.config import settings
 
-_is_sqlite = settings.database_url.startswith("sqlite")
+
+def _resolve_url_and_args() -> tuple[str, dict]:
+    if settings.turso_database_url:
+        host = settings.turso_database_url.replace("libsql://", "", 1)
+        url = f"sqlite+libsql://{host}?authToken={settings.turso_auth_token}&secure=true"
+        return url, {}
+    if settings.database_url.startswith("sqlite"):
+        return settings.database_url, {"check_same_thread": False}
+    return settings.database_url, {}
+
+
+_url, _connect_args = _resolve_url_and_args()
 
 engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False} if _is_sqlite else {},
+    _url,
+    connect_args=_connect_args,
     pool_pre_ping=True,
     future=True,
 )

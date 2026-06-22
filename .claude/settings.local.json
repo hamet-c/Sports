@@ -35,7 +35,9 @@
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'badge: {d[\\\\\"wins\\\\\"]}-{d[\\\\\"losses\\\\\"]} \\({d[\\\\\"win_rate\\\\\"]*100:.1f}%\\) over {d[\\\\\"n_recommendations\\\\\"]} recs'\\)\")",
       "Bash(grep -E \"joblib$|joblib.old$|pre-isplayoff\")",
       "PowerShell($proc = Get-Process | Where-Object { $_.ProcessName -eq 'uvicorn' } | Select-Object -First 1; if \\($proc\\) { Stop-Process -Id $proc.Id -Force; Write-Host \"Stopped uvicorn pid=$\\($proc.Id\\)\" } else { Write-Host \"uvicorn not running\" })",
-      "Bash(grep -nE \"^#{1,3} \" \"C:\\\\Users\\\\miken\\\\OneDrive\\\\Desktop\\\\Sports\\\\NEXT_SESSION.md\")"
+      "Bash(grep -nE \"^#{1,3} \" \"C:\\\\Users\\\\miken\\\\OneDrive\\\\Desktop\\\\Sports\\\\NEXT_SESSION.md\")",
+      "Bash(git ls-remote *)",
+      "Bash(backend/.venv/Scripts/python.exe -c \"import sqlite3; conn=sqlite3.connect\\('data/nba_props.db'\\); rows=conn.execute\\('SELECT name FROM sqlite_master WHERE type=\\\\\"table\\\\\"'\\).fetchall\\(\\); print\\('Tables:', [r[0] for r in rows]\\); [print\\(f'{t[0]}: {conn.execute\\(f\\\\\"SELECT COUNT\\(*\\) FROM {t[0]}\\\\\"\\).fetchone\\(\\)[0]} rows'\\) for t in rows]\")"
     ]
   }
 }

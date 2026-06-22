@@ -20,6 +20,9 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{(project_root / 'data' / 'nba_props.db').as_posix()}"
 
+    turso_database_url: str = ""
+    turso_auth_token: str = ""
+
     odds_api_key: str = ""
     odds_api_base: str = "https://api.the-odds-api.com/v4"
 
