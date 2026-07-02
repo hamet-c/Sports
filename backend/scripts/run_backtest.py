@@ -362,14 +362,14 @@ def main() -> None:
         result = run_synthetic(args.start, args.end, args.min_minutes)
 
     if args.save and result:
-        from datetime import datetime as _dt
         from app.core.config import settings as _settings
+        from app.core.timeutil import utcnow_iso_z
         reports_dir = _settings.data_dir / "reports"
         reports_dir.mkdir(parents=True, exist_ok=True)
         out_path = reports_dir / f"{args.mode}_backtest.json"
         envelope = {
             "mode": args.mode,
-            "generated_at": _dt.utcnow().isoformat() + "Z",
+            "generated_at": utcnow_iso_z(),
             "start": args.start.isoformat(),
             "end": args.end.isoformat(),
             "result": result,

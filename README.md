@@ -4,7 +4,7 @@ Predicts NBA player stat lines (points, rebounds, assists, threes-made) and surf
 
 ## Stack
 
-Python 3.14 · FastAPI · SQLAlchemy · SQLite · XGBoost · pandas · React 18 · Vite · TanStack Query · Tailwind · Recharts.
+Python 3.14 · FastAPI · SQLAlchemy · SQLite (local) + Turso/libSQL (CI ingest) · XGBoost · pandas · React 18 · Vite · TanStack Query · Tailwind · Recharts.
 
 ## Layout
 
@@ -48,9 +48,25 @@ Backend needs a `.env` (see `backend/.env.example`) with an `ODDS_API_KEY` from 
 cd backend
 .venv\Scripts\python.exe scripts\ingest_props.py
 .venv\Scripts\python.exe scripts\refresh_injuries.py
+.venv\Scripts\python.exe scripts\log_recommendations.py   # freeze today's recs
+.venv\Scripts\python.exe scripts\grade_recommendations.py # grade past recs
 ```
 
-Automated via GitHub Actions — see `.github/workflows/daily-ingest.yml`. Pull latest before working locally so the DB is current.
+Automated via GitHub Actions (`.github/workflows/daily-ingest.yml`): a scheduled
+job ingests props + injuries into **Turso** (hosted libSQL) daily during the
+season using the `TURSO_DATABASE_URL` / `TURSO_AUTH_TOKEN` / `ODDS_API_KEY`
+repo secrets. The DB file itself is not in git.
+
+### Local vs Turso
+
+The engine talks to the local `data/nba_props.db` unless `USE_TURSO=1` is set
+(plus both Turso vars — see `backend/.env.example`). Keep local as default on
+this machine: the `sqlite+libsql` dialect has no Windows / Python 3.14 wheels
+(CI pins Python 3.12), and training/backtests should never run over the
+network. `scripts/migrate_to_turso.py` copies local → Turso one-way
+(idempotent, `--verify` for row counts); run it from a Python 3.12 venv.
+Stats tables stay locally-mastered (bootstrap); odds/injury tables accumulate
+on Turso via CI — sync down before the next training season.
 
 ## Backtests
 

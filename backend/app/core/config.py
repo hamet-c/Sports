@@ -20,6 +20,11 @@ class Settings(BaseSettings):
 
     database_url: str = f"sqlite:///{(project_root / 'data' / 'nba_props.db').as_posix()}"
 
+    # Turso (hosted libSQL) is opt-in: set USE_TURSO=1 *and* the two vars
+    # below. Local scripts must never set USE_TURSO — the sqlite+libsql
+    # dialect has no Windows/cp314 wheels, and heavy scripts (train/backtest/
+    # diagnose) would crawl over the network anyway. CI sets all three.
+    use_turso: bool = False
     turso_database_url: str = ""
     turso_auth_token: str = ""
 

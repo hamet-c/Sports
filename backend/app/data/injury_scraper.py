@@ -20,6 +20,8 @@ import httpx
 from loguru import logger
 from tenacity import retry, stop_after_attempt, wait_exponential
 
+from app.core.timeutil import utcnow
+
 
 _STATUS_MAP = {
     "out": "OUT",
@@ -58,7 +60,7 @@ class ESPNInjuryScraper:
 
     def fetch_all(self) -> list[InjuryRecord]:
         payload = self._fetch()
-        captured_at = datetime.utcnow()
+        captured_at = utcnow()
         out: list[InjuryRecord] = []
         for team in payload.get("injuries", []):
             team_abbr = (team.get("team") or {}).get("abbreviation")

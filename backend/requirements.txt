@@ -7,7 +7,9 @@ pydantic-settings>=2.2.0
 # Database
 sqlalchemy>=2.0.0
 alembic>=1.13.0
-sqlalchemy-libsql>=0.1.0
+# libsql dialect only installs on Linux (libsql-experimental has no
+# Windows / cp314 wheels). Local dev uses plain sqlite; CI uses Turso.
+sqlalchemy-libsql>=0.2.0 ; sys_platform == "linux"
 
 # Data
 pandas>=2.2.0

@@ -9,8 +9,6 @@ Design notes:
 - External NBA stats IDs preserved as `nba_id` so re-runs of bootstrap upsert
   rather than duplicate.
 """
-from datetime import datetime
-
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -26,6 +24,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
+from app.core.timeutil import utcnow
 from app.db.session import Base
 
 
@@ -153,7 +152,7 @@ class PropLine(Base):
     line = Column(Float, nullable=False)
     over_odds = Column(Integer, nullable=False)
     under_odds = Column(Integer, nullable=False)
-    captured_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    captured_at = Column(DateTime, nullable=False, default=utcnow, index=True)
     __table_args__ = (
         Index("ix_prop_lookup", "player_id", "game_id", "stat_type", "book"),
         Index("ix_prop_game_stat", "game_id", "stat_type"),
@@ -170,7 +169,7 @@ class GameMarket(Base):
     total = Column(Float)
     home_moneyline = Column(Integer)
     away_moneyline = Column(Integer)
-    captured_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    captured_at = Column(DateTime, nullable=False, default=utcnow, index=True)
     __table_args__ = (UniqueConstraint("game_id", "book", "captured_at"),)
 
 
@@ -196,6 +195,51 @@ class Prediction(Base):
     expected_value_under = Column(Float)
 
     features_json = Column(JSON)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    created_at = Column(DateTime, nullable=False, default=utcnow, index=True)
     actual_value = Column(Float)
     __table_args__ = (Index("ix_pred_pg_stat", "player_id", "game_id", "stat_type"),)
+
+
+class RecommendationLog(Base):
+    """What the engine actually recommended at slate time, frozen forever.
+
+    /slate/recommendation_record re-grades old PropLines with the *current*
+    model ("how would this model have done?"). This table records what the
+    deployed model + thresholds said pre-tip ("how did we actually do?"),
+    enabling honest retrospective grading across model generations. PASS
+    rows are logged too: with p_over/EVs stored, any alternative threshold
+    can be re-derived offline. One row per prop — the latest pre-tip
+    snapshot wins via upsert on (player_id, game_id, stat_type, book).
+    """
+    __tablename__ = "recommendation_log"
+    id = Column(Integer, primary_key=True)
+    created_at = Column(DateTime, nullable=False, default=utcnow, index=True)
+    game_date = Column(Date, nullable=False, index=True)
+    player_id = Column(Integer, ForeignKey("players.id"), nullable=False)
+    game_id = Column(Integer, ForeignKey("games.id"), nullable=False)
+    stat_type = Column(String(16), nullable=False)
+    book = Column(String(32), nullable=False)
+    line = Column(Float, nullable=False)
+    over_odds = Column(Integer, nullable=False)
+    under_odds = Column(Integer, nullable=False)
+
+    p_over = Column(Float, nullable=False)      # calibrated (what the rec used)
+    raw_p_over = Column(Float)                  # pre-calibration, for calibrator audits
+    ev_over = Column(Float, nullable=False)
+    ev_under = Column(Float, nullable=False)
+    recommendation = Column(String(8), nullable=False)  # OVER | UNDER | PASS
+    edge_threshold_used = Column(Float, nullable=False)
+    edge_threshold_over_used = Column(Float, nullable=False)
+    model_version = Column(String(64), nullable=False)
+    calibrated = Column(Boolean, nullable=False, default=False)
+    sharp_flag = Column(Boolean, nullable=False, default=False)
+
+    # Filled by scripts/grade_recommendations.py once actuals exist.
+    actual_value = Column(Float)
+    result = Column(String(8))                  # WIN | LOSS | PUSH (NULL for PASS)
+    graded_at = Column(DateTime)
+
+    __table_args__ = (
+        UniqueConstraint("player_id", "game_id", "stat_type", "book"),
+        Index("ix_reclog_date_stat", "game_date", "stat_type"),
+    )

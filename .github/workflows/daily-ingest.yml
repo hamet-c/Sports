@@ -1,0 +1,44 @@
+name: daily-ingest
+
+on:
+  schedule:
+    # 14:30 UTC = 10:30 ET during EDT (09:30 during EST — the drift is
+    # immaterial for morning odds capture). Months 1-6 and 10-12 only:
+    # July-September is deep offseason, no reason to burn runner minutes.
+    - cron: "30 14 * 1-6,10-12 *"
+  workflow_dispatch: {}
+
+concurrency:
+  group: daily-ingest
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      USE_TURSO: "1"
+      TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+      TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+      ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          # 3.12, not latest: sqlalchemy-libsql -> libsql-experimental has no
+          # cp313+/cp314 manylinux wheels yet.
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements-ingest.txt
+
+      - name: Install ingest dependencies
+        run: pip install -r backend/requirements-ingest.txt
+
+      - name: Ingest prop lines
+        working-directory: backend
+        run: python scripts/ingest_props.py
+
+      - name: Refresh injury reports
+        working-directory: backend
+        run: python scripts/refresh_injuries.py

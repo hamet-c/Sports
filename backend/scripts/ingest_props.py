@@ -30,6 +30,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from loguru import logger
 
 from app.core.logging import configure_logging
+from app.core.timeutil import utcnow
 from app.data.odds_api_client import OddsAPIClient, odds_client
 from app.db.models import Game, GameMarket, Player, PropLine, Team
 from app.db.session import SessionLocal, init_db
@@ -65,18 +66,24 @@ def _ensure_game(
     away_team: Team,
     season_hint: str,
 ) -> Game:
-    g = (
+    matches = (
         db.query(Game)
         .filter(Game.game_date == game_date)
         .filter(Game.home_team_id == home_team.id)
         .filter(Game.away_team_id == away_team.id)
-        .one_or_none()
+        .all()
     )
-    if g is not None:
-        return g
+    if matches:
+        # Stub/real twins can coexist until reconcile_stub_games.py merges
+        # them — prefer the real (nba_id-bearing) row so new props attach to
+        # the game that has actuals.
+        for g in matches:
+            if g.nba_id is not None:
+                return g
+        return matches[0]
     # Some games (today / future slate) don't exist yet. Create a placeholder
-    # without an nba_id; bootstrap_data will reconcile via nba_id when the
-    # season's game logs come in.
+    # without an nba_id; bootstrap_data will adopt it when the season's game
+    # logs come in.
     g = Game(
         sport="nba",
         season=season_hint,
@@ -156,7 +163,7 @@ def ingest_event_props(
     bookmakers = payload.get("bookmakers", [])
     rows: list[PropLine] = []
     unmatched: set[str] = set()
-    captured_at = datetime.utcnow()
+    captured_at = utcnow()
 
     for bm in bookmakers:
         book = bm.get("key", "")
@@ -211,7 +218,7 @@ def ingest_game_lines(
     creates a new snapshot. Use sparingly to conserve free-tier requests.
     """
     games_payload = client.get_nba_odds(markets=["spreads", "totals", "h2h"])
-    captured_at = datetime.utcnow()
+    captured_at = utcnow()
     rows: list[GameMarket] = []
 
     for ev in games_payload:
@@ -283,9 +290,14 @@ def main(target: date | None) -> None:
             teams_by_name = _team_index(db)
             players_by_lower = _player_index(db)
 
+            # /events is quota-free; check it before the quota-counted /odds
+            # call so offseason runs (empty events list) burn zero quota.
             logger.info("Fetching NBA events")
             events = client.get_nba_events()
             logger.info(f"{len(events)} events returned")
+            if not events:
+                logger.info("No NBA events (offseason or dark day) — nothing to ingest.")
+                return
 
             n_game_lines = ingest_game_lines(
                 db, client, teams_by_name=teams_by_name, target_date=target,

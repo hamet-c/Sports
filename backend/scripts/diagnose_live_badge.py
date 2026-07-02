@@ -141,14 +141,23 @@ def _grade_at_threshold(
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--days", type=int, default=7)
+    # Explicit window overrides --days; needed to grade historical slates
+    # (e.g. the May playoff sample from the offseason) reproducibly.
+    parser.add_argument("--start", type=date.fromisoformat, default=None)
+    parser.add_argument("--end", type=date.fromisoformat, default=None)
     args = parser.parse_args()
+    if (args.start is None) != (args.end is None):
+        parser.error("--start and --end must be given together")
 
     init_db()
     registries = _load_registries()
 
-    today = date.today()
-    start = today - timedelta(days=args.days)
-    end = today - timedelta(days=1)
+    if args.start is not None:
+        start, end = args.start, args.end
+    else:
+        today = date.today()
+        start = today - timedelta(days=args.days)
+        end = today - timedelta(days=1)
 
     db = SessionLocal()
     try:

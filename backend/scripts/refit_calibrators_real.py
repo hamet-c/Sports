@@ -28,6 +28,7 @@ Usage (from backend/):
 from __future__ import annotations
 
 import argparse
+import shutil
 import sys
 from collections import defaultdict
 from datetime import date
@@ -40,6 +41,7 @@ from loguru import logger
 
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.core.timeutil import utcnow
 from app.db.models import Game, PlayerGameStats, PropLine
 from app.db.session import SessionLocal, init_db
 from app.features.builder import FEATURE_COLUMNS, FeatureBuilder, coerce_feature_frame
@@ -303,6 +305,12 @@ def main(start: date, end: date, eval_fraction: float, save: bool) -> None:
 
         for stat, cal in fitted.items():
             out = settings.models_dir / f"{stat}_xgbq_calibration.joblib"
+            if out.exists():
+                # NB: never reuse the .joblib.old suffix — diagnose_live_badge
+                # loads that as its cal_old config.
+                backup = out.parent / f"{out.name}.bak-{utcnow().strftime('%Y%m%dT%H%M%S')}"
+                shutil.copy2(out, backup)
+                logger.info(f"Backed up existing calibrator to {backup}")
             cal.save(str(out))
             logger.info(f"Saved {out}")
     finally:

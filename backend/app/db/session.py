@@ -8,7 +8,11 @@ from app.core.config import settings
 
 
 def _resolve_url_and_args() -> tuple[str, dict]:
-    if settings.turso_database_url:
+    if settings.use_turso:
+        if not (settings.turso_database_url and settings.turso_auth_token):
+            raise RuntimeError(
+                "USE_TURSO is set but TURSO_DATABASE_URL/TURSO_AUTH_TOKEN are missing"
+            )
         host = settings.turso_database_url.replace("libsql://", "", 1)
         url = f"sqlite+libsql://{host}?authToken={settings.turso_auth_token}&secure=true"
         return url, {}

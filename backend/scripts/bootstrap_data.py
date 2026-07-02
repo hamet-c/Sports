@@ -98,6 +98,23 @@ def _ensure_game(
     existing = db.query(Game).filter(Game.nba_id == nba_game_id).one_or_none()
     if existing is not None:
         return existing.id
+    # Prop ingest may have created a stub (nba_id=None) for this matchup
+    # before the game log arrived. Adopt it instead of inserting a twin so
+    # PropLines stay attached to the row that gets actuals.
+    stub = (
+        db.query(Game)
+        .filter(Game.nba_id.is_(None))
+        .filter(Game.game_date == game_date)
+        .filter(Game.home_team_id == home_team_id)
+        .filter(Game.away_team_id == away_team_id)
+        .first()
+    )
+    if stub is not None:
+        stub.nba_id = nba_game_id
+        stub.season = season
+        stub.is_completed = True
+        db.flush()
+        return stub.id
     g = Game(
         sport="nba",
         nba_id=nba_game_id,
@@ -131,9 +148,15 @@ def ingest_player_season(
     nba_player_id: int,
     season: str,
     team_abbr_to_id: dict[str, int],
+    since: date | None = None,
 ) -> int:
     """Pull a player's season game log (regular season + playoffs) and upsert
     into PlayerGameStats + Game.
+
+    `since` keeps only rows with game_date > since. The delete-then-reinsert
+    below is scoped to the ingested game_ids, so filtering here leaves older
+    rows (and their advanced-box fields) untouched — the cheap incremental
+    top-up path.
     """
     frames = []
     for season_type in SEASON_TYPES:
@@ -152,6 +175,8 @@ def ingest_player_season(
     if not frames:
         return 0
     df = pd.concat(frames, ignore_index=True)
+    if since is not None and not df.empty:
+        df = df[pd.to_datetime(df["game_date"]).dt.date > since]
     if df.empty:
         return 0
 
@@ -214,6 +239,7 @@ def ingest_team_season(
     nba_team_id: int,
     season: str,
     team_abbr_to_id: dict[str, int],
+    since: date | None = None,
 ) -> int:
     frames = []
     for season_type in SEASON_TYPES:
@@ -232,6 +258,8 @@ def ingest_team_season(
     if not frames:
         return 0
     df = pd.concat(frames, ignore_index=True)
+    if since is not None and not df.empty:
+        df = df[pd.to_datetime(df["game_date"]).dt.date > since]
     if df.empty:
         return 0
 
@@ -545,7 +573,7 @@ def fill_team_game_allowed(db) -> int:
     return rows_updated
 
 
-def bootstrap_seasons(seasons: list[str]) -> None:
+def bootstrap_seasons(seasons: list[str], since: date | None = None) -> None:
     init_db()
     db = SessionLocal()
     try:
@@ -565,6 +593,7 @@ def bootstrap_seasons(seasons: list[str]) -> None:
                     nba_team_id=team.nba_id,
                     season=season,
                     team_abbr_to_id=team_abbr_to_id,
+                    since=since,
                 )
 
             logger.info(f"Season {season}: ingesting player game logs")
@@ -579,6 +608,7 @@ def bootstrap_seasons(seasons: list[str]) -> None:
                     nba_player_id=player.nba_id,
                     season=season,
                     team_abbr_to_id=team_abbr_to_id,
+                    since=since,
                 )
             logger.info(f"Season {season}: ingested {n_rows_total} player-game rows")
 
@@ -586,9 +616,12 @@ def bootstrap_seasons(seasons: list[str]) -> None:
         n = fill_team_game_allowed(db)
         logger.info(f"Updated {n} TeamGameStats with allowed columns")
 
-        logger.info("Filling player static info (position/team/height/weight)")
-        u, f = fill_player_static(db)
-        logger.info(f"Player static fill: {u} updated, {f} failed")
+        if since is None:
+            logger.info("Filling player static info (position/team/height/weight)")
+            u, f = fill_player_static(db)
+            logger.info(f"Player static fill: {u} updated, {f} failed")
+        else:
+            logger.info("--since set: skipping player static refresh")
 
         logger.info("Filling advanced box-score data (usage / started / def_rtg / pace)")
         p, s, fail = fill_advanced_box_scores(db, only_missing=True)
@@ -640,10 +673,21 @@ if __name__ == "__main__":
         action="store_true",
         help="When combined with --advanced-only, re-fetch every game (default skips games already filled).",
     )
+    parser.add_argument(
+        "--since",
+        type=date.fromisoformat,
+        default=None,
+        help=(
+            "Only ingest rows with game_date strictly after this date. "
+            "Incremental top-up: existing rows (incl. advanced-box fields) "
+            "outside the window are left untouched, and the player-static "
+            "refresh is skipped."
+        ),
+    )
     args = parser.parse_args()
     if args.players_only:
         bootstrap_player_static_only()
     elif args.advanced_only:
         bootstrap_advanced_only(force=args.force_advanced)
     else:
-        bootstrap_seasons(args.seasons)
+        bootstrap_seasons(args.seasons, since=args.since)

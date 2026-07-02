@@ -54,6 +54,7 @@ def _table_order() -> list[str]:
         "prop_lines",
         "game_markets",
         "predictions",
+        "recommendation_log",
     ]
 
 

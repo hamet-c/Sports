@@ -13,8 +13,9 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
 import sys
-from datetime import date, datetime
+from datetime import date
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -27,6 +28,7 @@ from tqdm import tqdm
 
 from app.core.config import settings
 from app.core.logging import configure_logging
+from app.core.timeutil import utcnow_iso_z
 from app.db.models import PlayerGameStats, PropLine
 from app.db.session import SessionLocal, init_db
 from app.features.builder import FEATURE_COLUMNS, FeatureBuilder, coerce_feature_frame
@@ -170,6 +172,7 @@ def train_for_stat(
     stat: str,
     tuned_params: dict | None = None,
     fit_calibrator: bool = True,
+    model_version: str = "v0.2",
 ) -> tuple[XGBQuantileRegressor, IsotonicCalibrator | None]:
     feature_cols = list(FEATURE_COLUMNS)
     anchor = train_df["as_of"].max()
@@ -179,7 +182,7 @@ def train_for_stat(
     w_train = _recency_weights(train_df["as_of"], anchor)
     X_train, y_train, w_train = _drop_label_nans(X_train, y_train, w_train)
 
-    model = XGBQuantileRegressor(stat_type=stat, model_version="v0.2")
+    model = XGBQuantileRegressor(stat_type=stat, model_version=model_version)
     eval_pair = None
     if not val_df.empty:
         X_val = val_df[feature_cols]
@@ -301,7 +304,19 @@ def evaluate(model: XGBQuantileRegressor, val_df: pd.DataFrame, stat: str) -> di
     }
 
 
-def main(train_end: date, val_end: date, tune: str, skip_calibrator: bool) -> None:
+def _backup_existing(path) -> None:
+    """Copy an artifact aside before overwrite. The .bak-<ts> suffix must
+    never match registry.load()'s *_xgbq.joblib glob."""
+    if path.exists():
+        backup = path.parent / f"{path.name}.bak-{utcnow_iso_z().replace(':', '')[:-1]}"
+        shutil.copy2(path, backup)
+        logger.info(f"Backed up existing artifact to {backup}")
+
+
+def main(
+    train_end: date, val_end: date, tune: str, skip_calibrator: bool,
+    model_version: str,
+) -> None:
     init_db()
     db = SessionLocal()
     try:
@@ -328,15 +343,18 @@ def main(train_end: date, val_end: date, tune: str, skip_calibrator: bool) -> No
                 train_df, val_df, stat,
                 tuned_params=tuned,
                 fit_calibrator=not skip_calibrator,
+                model_version=model_version,
             )
             metrics = evaluate(model, val_df, stat)
             logger.info(f"{stat} metrics: {metrics}")
 
             out = settings.models_dir / f"{stat}_xgbq.joblib"
+            _backup_existing(out)
             model.save(str(out))
             logger.info(f"Saved {out}")
             if calibrator is not None:
                 cal_out = settings.models_dir / f"{stat}_xgbq_calibration.joblib"
+                _backup_existing(cal_out)
                 calibrator.save(str(cal_out))
                 logger.info(f"Saved {cal_out}")
             elif skip_calibrator:
@@ -351,7 +369,7 @@ def main(train_end: date, val_end: date, tune: str, skip_calibrator: bool) -> No
         coverage_path = reports_dir / "feature_coverage.json"
         coverage_path.write_text(json.dumps(
             {
-                "generated_at": datetime.utcnow().isoformat() + "Z",
+                "generated_at": utcnow_iso_z(),
                 "train_end": train_end.isoformat(),
                 "val_end": val_end.isoformat(),
                 "feature_columns": list(FEATURE_COLUMNS),
@@ -391,5 +409,14 @@ if __name__ == "__main__":
             "files are left untouched. Pair with use_calibrators=False."
         ),
     )
+    parser.add_argument(
+        "--model-version",
+        default=date.today().isoformat(),
+        help=(
+            "Version string stamped into the joblib bundle (default: today's "
+            "date). Surfaces in registry logs and RecommendationLog rows."
+        ),
+    )
     args = parser.parse_args()
-    main(args.train_end, args.val_end, args.tune, args.skip_calibrator)
+    main(args.train_end, args.val_end, args.tune, args.skip_calibrator,
+         args.model_version)

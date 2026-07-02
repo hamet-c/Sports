@@ -54,6 +54,9 @@ class ModelRegistry:
             except Exception as e:
                 logger.error(f"Failed to load {path}: {e}")
                 continue
+            # Disambiguate retrains of the same code version by file mtime.
+            pred.model_version = f"{pred.model_version}@{int(path.stat().st_mtime)}"
+            self._warn_on_feature_mismatch(stat, pred)
             cal: IsotonicCalibrator | None = None
             if self.use_calibrators:
                 cal_path = self.models_dir / f"{stat}_xgbq_calibration.joblib"
@@ -66,6 +69,27 @@ class ModelRegistry:
             logger.info(
                 f"Registered model for stat={stat} version={pred.model_version} "
                 f"calibrated={cal is not None}"
+            )
+
+    @staticmethod
+    def _warn_on_feature_mismatch(stat: str, pred: Predictor) -> None:
+        """The bundle snapshots the columns it was trained on; predict()
+        subselects to that snapshot, so drift vs the live FEATURE_COLUMNS is
+        otherwise invisible. Order-only differences are harmless."""
+        from app.features.builder import FEATURE_COLUMNS  # lazy: avoid startup coupling
+
+        bundle_cols = getattr(pred, "feature_columns", None)
+        if not bundle_cols:
+            return
+        code_only = [c for c in FEATURE_COLUMNS if c not in bundle_cols]
+        bundle_only = [c for c in bundle_cols if c not in FEATURE_COLUMNS]
+        if code_only or bundle_only:
+            logger.warning(
+                f"{stat}: feature mismatch vs FEATURE_COLUMNS "
+                f"(bundle={len(bundle_cols)}, code={len(FEATURE_COLUMNS)}). "
+                f"code-only (silently ignored by this model): {code_only or '—'}; "
+                f"bundle-only (will KeyError at predict): {bundle_only or '—'}. "
+                f"Retrain to pick up new features."
             )
 
     def get(self, stat_type: str) -> RegisteredModel | None:
